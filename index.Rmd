@@ -1,0 +1,86 @@
+---
+title: "ทดสอบ Flex Dashboard"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+```
+Chon Buri
+=================================
+Column {data-width=650 .tabset}
+-----------------------------------------------------------------------
+
+### Chon Buri
+จังหวัดชลบุรี มีพื้นที่ 4,363 ตารางกิโลเมตร มีที่ราบชายฝั่งทะเลตั้งแต่ปากแม่น้ำบางปะกงถึงอำเภอสัตหีบ คิดเป็นความยาวประมาณ 170 กิโลเมตร มีหาดทรายสวยงามหลายแห่งซึ่งได้รับการพัฒนาเป็นแหล่งท่องเที่ยวที่สำคัญ มีเกาะ 47 เกาะ เช่น เกาะสีชัง เกาะ แสมสาร เกาะล้าน เกาะครก เกาะสากและเกาะไผ่ อุณหภูมิเฉลี่ยรายปี 29 องศาเซลเซียส ปริมาณน้ำฝนเฉลี่ยรายปี 1,368.82 มิลลิเมตร แบ่งเขตการปกครองออกเป็น 11 อำเภอ 92 ตำบล 687 หมู่บ้าน มีประชากรรวมทั้งสิ้น 1,535,445 คน (เน้นชุมชนชายฝั่ง)
+```{r}
+library(readxl)
+library(leaflet)
+
+coord <-read_xlsx("Coordinates.xlsx",
+                  sheet = "Sheet1")
+
+leaflet(data=coord) %>%
+  addTiles() %>%
+  addMarkers(lng = ~longitude,
+             lat = ~latitude,
+             popup = ~station)
+
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Dissolved Oxygen
+
+```{r}
+library(tidyverse)
+
+WQ <- read_xlsx("WQ.xlsx",
+      sheet = "clone (2)")
+
+table01 <- WQ %>%
+  group_by(province, monsoon) %>%
+  summarise(mean(DO), 
+            sd(DO))
+
+knitr::kable(table01, digits = 2, 
+             col.names = c("จังหวัด", "ฤดูมรสุม", "DO", "SD"), 
+             caption = "ตารางที่ 1. ค่าออกซิเจนละลายน้ำในแต่ละจังหวัด")
+
+```
+
+### Dissolved Oxygen (Chart)
+
+```{r}
+
+table01 %>%
+  ggplot(aes(x = province ,
+             y = `mean(DO)`)) +
+  geom_col(aes(fill = monsoon),
+               position = position_dodge(0.8),
+               width = 0.7)+
+  geom_errorbar(
+    aes(ymin = `mean(DO)` - `sd(DO)`,
+        ymax = `mean(DO)` + `sd(DO)`,
+        group = monsoon),
+    width = 0.3,
+    position = position_dodge(0.8))+
+    labs(x = "province | จังหวัด",
+         y = "ปริมาณออกซิเจนละลายน้ำ")
+
+```
+
+Bangkok
+===================================
+
+
+
+
+
+
+Samut Prakarn
+===================================
